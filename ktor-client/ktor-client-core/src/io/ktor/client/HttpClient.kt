@@ -15,8 +15,8 @@ import java.io.*
  * This is a genering implementation that uses a specific engine [HttpClientEngine].
  */
 class HttpClient private constructor(
-        private val engine: HttpClientEngine,
-        block: suspend HttpClientConfig.() -> Unit = {}
+    private val engine: HttpClientEngine,
+    block: suspend HttpClientConfig.() -> Unit = {}
 ) : Closeable {
 
     /**
@@ -24,8 +24,8 @@ class HttpClient private constructor(
      * and an optional [block] for configuring this client.
      */
     constructor(
-            engineFactory: HttpClientEngineFactory<*>,
-            block: suspend HttpClientConfig.() -> Unit = {}
+        engineFactory: HttpClientEngineFactory<*>,
+        block: suspend HttpClientConfig.() -> Unit = {}
     ) : this(engineFactory.create(), block)
 
     /**
@@ -90,7 +90,7 @@ class HttpClient private constructor(
      * Creates a new [HttpRequest] from a request [data] and a specific client [call].
      */
     suspend fun execute(builder: HttpRequestBuilder): HttpClientCall =
-            requestPipeline.execute(builder, builder.body) as HttpClientCall
+        requestPipeline.execute(builder, builder.body) as HttpClientCall
 
     /**
      * Returns a new [HttpClient] copying this client configuration,
@@ -103,5 +103,14 @@ class HttpClient private constructor(
      */
     override fun close() {
         engine.close()
+
+        attributes.allKeys.forEach { key ->
+            @Suppress("UNCHECKED_CAST")
+            val feature = attributes[key as AttributeKey<Any>]
+
+            if (feature is AutoCloseable) {
+                feature.close()
+            }
+        }
     }
 }

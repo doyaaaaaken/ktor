@@ -9,9 +9,8 @@ import kotlinx.coroutines.experimental.*
 
 
 class CIOHttpRequest(
-        override val call: HttpClientCall,
-        private val engine: CIOEngine,
-        requestData: HttpRequestData
+    override val call: HttpClientCall,
+    requestData: HttpRequestData
 ) : HttpRequest {
     override val attributes: Attributes = Attributes()
     override val method: HttpMethod = requestData.method

@@ -2,6 +2,7 @@ package io.ktor.tests.websocket
 
 import io.ktor.application.*
 import io.ktor.http.*
+import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.testing.*

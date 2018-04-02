@@ -1,4 +1,4 @@
-package io.ktor.websocket
+package io.ktor.http.cio.websocket
 
 import io.ktor.util.*
 import kotlinx.coroutines.experimental.*

@@ -1,4 +1,4 @@
-package io.ktor.websocket
+package io.ktor.http.cio.websocket
 
 /**
  * Websocket close reason
@@ -45,5 +45,4 @@ data class CloseReason(val code: Short, val message: String) {
             fun byCode(code: Short) = byCodeMap[code]
         }
     }
-
 }

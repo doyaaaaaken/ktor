@@ -2,6 +2,7 @@ package io.ktor.tests.websocket
 
 import io.ktor.application.*
 import io.ktor.cio.*
+import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
 import io.ktor.server.testing.*
 import io.ktor.util.*
@@ -13,7 +14,7 @@ import kotlinx.io.core.ByteOrder
 import org.junit.*
 import org.junit.Test
 import org.junit.rules.*
-import java.nio.ByteBuffer
+import java.nio.*
 import java.time.*
 import java.util.*
 import java.util.concurrent.*
@@ -21,7 +22,7 @@ import kotlin.test.*
 
 class WebSocketTest {
     @get:Rule
-    val timeout = Timeout(30, TimeUnit.SECONDS)
+    val timeout = Timeout(30, TimeUnit.DAYS)
 
     @Test
     fun testSingleEcho() {
@@ -196,9 +197,8 @@ class WebSocketTest {
 
             application.routing {
                 webSocket("/") {
-                    val f = incoming.receive()
-
-                    val copied = f.copy()
+                    val frame = incoming.receive()
+                    val copied = frame.copy()
                     outgoing.send(copied)
 
                     flush()
@@ -211,8 +211,8 @@ class WebSocketTest {
                 runBlocking {
                     withTimeout(Duration.ofSeconds(10).toMillis()) {
                         val reader = @Suppress("DEPRECATION") WebSocketReader(
-                                call.response.websocketChannel()!!, { Int.MAX_VALUE.toLong() },
-                                Job(), DefaultDispatcher, KtorDefaultPool
+                            call.response.websocketChannel()!!, Int.MAX_VALUE.toLong(),
+                            Job(), DefaultDispatcher
                         )
 
                         val frame = reader.incoming.receive()
@@ -251,10 +251,10 @@ class WebSocketTest {
             var receivedText: String? = null
             application.routing {
                 webSocket("/") {
-                    val f = incoming.receive()
+                    val frame = incoming.receive()
 
-                    if (f is Frame.Text) {
-                        receivedText = f.readText()
+                    if (frame is Frame.Text) {
+                        receivedText = frame.readText()
                     } else {
                         fail()
                     }

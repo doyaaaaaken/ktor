@@ -1,13 +1,8 @@
-package io.ktor.websocket
+package io.ktor.http.cio.websocket
 
 import kotlinx.coroutines.experimental.channels.*
-import io.ktor.application.*
 
 interface WebSocketSession {
-    val call: ApplicationCall
-
-    val application: Application
-
     /**
      * Incoming frames channel
      */
@@ -48,6 +43,8 @@ interface WebSocketSession {
      * Initiate connection termination immediately. Termination may complete asynchronously.
      */
     fun terminate()
+
+    suspend fun close(cause: Throwable? = null)
 }
 
 suspend fun WebSocketSession.close(reason: CloseReason) {

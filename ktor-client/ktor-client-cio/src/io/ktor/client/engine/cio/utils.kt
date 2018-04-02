@@ -1,6 +1,5 @@
 package io.ktor.client.engine.cio
 
-import io.ktor.client.call.*
 import io.ktor.content.*
 import io.ktor.http.*
 import io.ktor.http.cio.*
@@ -8,7 +7,7 @@ import io.ktor.util.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.io.*
 
-internal suspend fun CIOHttpRequest.write(output: ByteWriteChannel, content: OutgoingContent) {
+internal suspend fun CIOHttpRequest.write(output: ByteWriteChannel) {
     val builder = RequestResponseBuilder()
 
     val contentLength = headers[HttpHeaders.ContentLength] ?: content.contentLength?.toString()
@@ -52,7 +51,7 @@ internal suspend fun CIOHttpRequest.write(output: ByteWriteChannel, content: Out
         builder.release()
     }
 
-    if (content is OutgoingContent.NoContent)
+    if (content is OutgoingContent.NoContent || content is OutgoingContent.ProtocolUpgrade)
         return
 
     val chunkedJob: EncoderJob? = if (chunked) encodeChunked(output, Unconfined) else null
@@ -61,12 +60,10 @@ internal suspend fun CIOHttpRequest.write(output: ByteWriteChannel, content: Out
     try {
         when (content) {
             is OutgoingContent.NoContent -> return
-            is OutgoingContent.ByteArrayContent -> {
-                channel.writeFully(content.bytes())
-            }
+            is OutgoingContent.ByteArrayContent -> channel.writeFully(content.bytes())
             is OutgoingContent.ReadChannelContent -> content.readFrom().joinTo(channel, closeOnEnd = false)
             is OutgoingContent.WriteChannelContent -> content.writeTo(channel)
-            is OutgoingContent.ProtocolUpgrade -> throw UnsupportedContentTypeException(content)
+            is OutgoingContent.ProtocolUpgrade -> return
         }
     } catch (cause: Throwable) {
         channel.close(cause)

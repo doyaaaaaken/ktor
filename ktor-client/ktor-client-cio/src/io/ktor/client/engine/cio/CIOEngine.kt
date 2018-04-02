@@ -17,7 +17,7 @@ class CIOEngine(private val config: CIOEngineConfig) : HttpClientEngine {
     private val closed = AtomicBoolean()
 
     override suspend fun execute(call: HttpClientCall, data: HttpRequestData): HttpEngineCall {
-        val request = CIOHttpRequest(call, this, data)
+        val request = CIOHttpRequest(call, data)
         val response = executeRequest(request)
 
         return HttpEngineCall(request, response)
